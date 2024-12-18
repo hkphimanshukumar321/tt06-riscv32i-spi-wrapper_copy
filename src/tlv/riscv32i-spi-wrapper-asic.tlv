@@ -34,7 +34,7 @@
 
    // CPU configs
    var(num_regs, 32)  // 32 for full reg file.
-   var(dmem_size, 32)  // Size of DMem, a power of 2.
+   var(dmem_size, 8)  // Size of DMem, a power of 2.
    
    
    // ======================
@@ -69,13 +69,13 @@
          $imem_addr[3:0] = ($reset) ? *spi_prog_addr : $pc[5:2];
          
       @1 
-         /imem[31:0]
-            $wr = |cpu$imem_wr_en && (|cpu$imem_addr[4:0] == #imem);
+         /imem[15:0]
+            $wr = |cpu$imem_wr_en && (|cpu$imem_addr[3:0] == #imem);
             $value[31:0] = *reset ? 32'b0 :
                            $wr    ? |cpu$imem_wr_data :
                                     $RETAIN;
          ?$imem_rd_en
-            $imem_rd_data[31:0] = /imem[$imem_addr[4:0]]>>1$value;
+            $imem_rd_data[31:0] = /imem[$imem_addr[3:0]]>>1$value;
          
          
          $imem_wr_en = *spi_imem_wr_en;
@@ -111,7 +111,7 @@
          $rs1_valid = $is_r_instr || $is_i_instr || $is_s_instr || $is_b_instr;
          $rs2_valid = $is_r_instr || $is_s_instr || $is_b_instr;
          $func3_valid = $is_r_instr || $is_i_instr || $is_s_instr || $is_b_instr;
-         $func7_valid = $is_r_instr;
+         //$func7_valid = $is_r_instr;
          
          // operand and control decode
          $opcode[6:0] = $instr[6:0];
@@ -123,8 +123,8 @@
             $rs2[4:0] = $instr[24:20];
          ?$func3_valid
             $func3[2:0] = $instr[14:12];
-         ?$func7_valid
-            $func7[6:0] = $instr[31:25];
+         //?$func7_valid
+            //$func7[6:0] = $instr[31:25];
          
          // instruction decoding (rv32i w/o R4 instrs)
          $dec_bits[10:0] = { $instr[30], $func3, $opcode };
